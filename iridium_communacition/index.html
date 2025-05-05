@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspberry Pi Sensör Takip Sistemi</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #1e1e2e;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .container {
+            display: flex;
+            width: 90%;
+            max-width: 1200px;
+            background-color: #2a2a3b;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .video-container {
+            width: 40%;
+            padding: 20px;
+            text-align: center;
+            background-color: #1b1b2b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .video-container img {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 8px;
+            border: 3px solid #007bff;
+        }
+
+        .thermal-container {
+            margin-top: 15px;
+        }
+
+        .thermal-container img {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 8px;
+            border: 3px solid #ff4500;
+        }
+
+        .data-container {
+            width: 60%;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .box {
+            background-color: #3b3b5a;
+            border-radius: 8px;
+            box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            margin: 10px;
+            width: 90%; /* Kutucuk genişliği artırıldı */
+            text-align: left; /* Metinler sola yapışık */
+            font-size: 18px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .box:hover {
+            transform: scale(1.05);
+            background-color: #4a4a6e;
+        }
+
+        .box h2 {
+            text-align: center;
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            margin: -15px -15px 15px -15px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .error {
+            color: #ff4444;
+            font-weight: bold;
+        }
+
+        h1 {
+            text-align: center;
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            margin: 0;
+            width: 100%;
+        }
+
+        .sensor-data-container {
+            width: 40%;
+            padding: 20px;
+            background-color: #1b1b2b;
+            border-radius: 10px;
+            margin-right: 20px;
+        }
+
+        .sensor-data-container h1 {
+            margin-bottom: 20px;
+        }
+
+        .sensor-data-box {
+            background-color: #3b3b5a;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .sensor-data-box h3 {
+            margin: 0 0 10px 0;
+            color: #007bff;
+        }
+    </style>
+    <script>
+        function fetchSensorData() {
+            fetch('/get_sensor_data')
+                .then(response => response.json())
+                .then(data => {
+                    // BMP280 Verileri
+                    const bmp280Box = document.getElementById("bmp280-data");
+                    if (data.bmp280.error) {
+                        bmp280Box.innerHTML = `<div class="error">${data.bmp280.error}</div>`;
+                    } else {
+                        bmp280Box.innerHTML = `
+                            <div>🌡️ Sıcaklık: ${data.bmp280.temperature}°C</div>
+                            <div>🔵 Basınç: ${data.bmp280.pressure} hPa</div>
+                            <div>📏 Yükseklik: ${data.bmp280.altitude} m</div>
+                        `;
+                    }
+
+                    // BNO055 Verileri
+                    const bno055Box = document.getElementById("bno055-data");
+                    if (data.bno055.error) {
+                        bno055Box.innerHTML = `<div class="error">${data.bno055.error}</div>`;
+                    } else {
+                        bno055Box.innerHTML = `
+                            <div>🔄 Euler Açıları: Yaw=${data.bno055.euler.yaw}°, Pitch=${data.bno055.euler.pitch}°, Roll=${data.bno055.euler.roll}°</div>
+                            <div>⚡ İvme: X=${data.bno055.acceleration.x}, Y=${data.bno055.acceleration.y}, Z=${data.bno055.acceleration.z}</div>
+                            <div>🔀 Lineer İvme: X=${data.bno055.linear_acceleration.x}, Y=${data.bno055.linear_acceleration.y}, Z=${data.bno055.linear_acceleration.z}</div>
+                            <div>🌀 Quaternion: W=${data.bno055.quaternion.w}, X=${data.bno055.quaternion.x}, Y=${data.bno055.quaternion.y}, Z=${data.bno055.quaternion.z}</div>
+                            <div>🧭 Açısal Hız: X=${data.bno055.angular_velocity.x}, Y=${data.bno055.angular_velocity.y}, Z=${data.bno055.angular_velocity.z}</div>
+                            <div>🌍 Yer Çekimi İvmesi: ${data.bno055.gravity} m/s²</div>
+                        `;
+                    }
+
+                    // Mesafe Verisi
+                    const distanceBox = document.getElementById("distance-data");
+                    if (data.distance_error) {
+                        distanceBox.innerHTML = `<div class="error">${data.distance_error}</div>`;
+                    } else {
+                        distanceBox.innerHTML = `📡 Mesafe: ${data.distance} cm`;
+                    }
+
+                    // Vericiden Gelen Veriler
+                    const transmitterDataBox = document.getElementById("transmitter-data");
+                    if (data.transmitter_error) {
+                        transmitterDataBox.innerHTML = `<div class="error">${data.transmitter_error}</div>`;
+                    } else {
+                        transmitterDataBox.innerHTML = `
+                            <div>📡 Sensör: ${data.transmitter.sensor}</div>
+                            <div>📍 Konum: ${data.transmitter.location}</div>
+                            <div>🚨 Hata: ${data.transmitter.error}</div>
+                        `;
+                    }
+                })
+                .catch(error => console.error("Hata:", error));
+        }
+
+        setInterval(fetchSensorData, 1000); // Her 1 saniyede bir güncelle
+    </script>
+</head>
+<body onload="fetchSensorData()">
+    <div class="container">
+        <div class="sensor-data-container">
+            <h1>Vericiden Gelen Veriler</h1>
+            <div class="sensor-data-box" id="transmitter-data">
+                Yükleniyor...
+            </div>
+        </div>
+        <div class="video-container">
+            <h1>Canlı Video Akışı</h1>
+            <img src="http://192.168.43.18:5000/video_feed" alt="Canlı Video Akışı">
+            <div class="thermal-container">
+                <h1>Termal Görüntü</h1>
+                <img src="http://192.168.43.18:5000/thermal_feed" alt="Termal Görüntü">
+            </div>
+        </div>
+        <div class="data-container">
+            <div class="box">
+                <h2>BMP280 Sensör Verileri</h2>
+                <div id="bmp280-data">Yükleniyor...</div>
+            </div>
+            <div class="box">
+                <h2>BNO055 Sensör Verileri</h2>
+                <div id="bno055-data">Yükleniyor...</div>
+            </div>
+            <div class="box">
+                <h2>Mesafe Sensörü</h2>
+                <div id="distance-data">Yükleniyor...</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
