@@ -1,0 +1,26 @@
+# Temel bağımlılıklar
+pyserial==3.5
+flask==2.2.3
+numpy==1.24.3
+opencv-python==4.7.0.72
+flask-socketio==5.3.4
+eventlet==0.33.3
+
+# IMU Sensörü için
+mpu6050-raspberrypi==1.4
+
+# Thermal Sensör için
+Adafruit-Blinka==8.19.1
+adafruit-circuitpython-mlx90640==1.1.5
+
+# Motor kontrol için
+RPi.GPIO==0.7.1
+pigpio==1.78
+
+# Veri işleme
+pandas==1.5.3
+scipy==1.10.1
+
+# Geliştirme bağımlılıkları (opsiyonel)
+pytest==7.3.1
+black==23.3.0
