@@ -1,6 +1,6 @@
 # Hava Aracı Stabilizasyon ve İzleme Sistemi
 
-Bu proje, bir hava aracının dengede kalmasını sağlamak için IMU sensörü, Infrared Ranging sensörü, Thermal sensör ve iridium haberleşmesi kullanarak gerçek zamanlı verileri toplayan ve işleyen bir sistem geliştirmektedir.
+Bu proje, bir hava aracının dengede kalmasını sağlamak için IMU sensörü ve hava aracının bulunduğu bölgedeki bilgilere ulaşmak için Infrared Ranging sensörü, Thermal sensör ve iridium haberleşmesi kullanarak gerçek zamanlı verileri toplayan ve işleyen bir sistem geliştirmektedir.
 
 ## Proje Özeti
 
